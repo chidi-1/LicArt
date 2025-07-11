@@ -1,0 +1,367 @@
+const source = document.querySelector('a[href*="mailto"]');
+source.addEventListener('copy', (event) => {
+    const selection = document.getSelection();
+    event.clipboardData.setData('text/plain', selection.toString().toLowerCase());
+    // console.log(selection.text);
+    ym(82967638, 'reachGoal', 'copy_email');
+    event.preventDefault();
+});
+
+var currentCity = 'Санкт-Петербург';
+if (getCookie('lci_city') && getCookie('lci_city') != 'undefined') {
+    $.ajax({
+        url: window.location.origin+'/assets/components/labconcept/php/cityFromCookie.php',
+        type: 'post',
+        data: {city: getCookie('lci_city')},
+        success: function(data) {
+            data = JSON.parse(data);
+            if (data['status'] == 'ok') {
+                // console.log('City: true');
+                // console.log('City: '+data['city']);
+                $('.citySelect > span').text(data['cityName']);
+                $('#modalCitySelect > span').text(data['cityName']);
+                currentCity = data['cityName'];
+                $('input[name="findyou"], input[name="city"], input#city').each(function(){
+                    $(this).val(currentCity);
+                });
+                if (data['cityCode'] == 'Nizhny Novgorod') {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (831) 228-80-02">+7 (831) 228-80-02</a>');
+                } else if (data['cityCode'] == 'Moscow') {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (495) 136-21-74">+7 (495) 136-21-74</a>');
+                } else if (data['cityCode'] == 'Kazan') {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (843) 205-48-85">+7 (843) 205-48-85</a>');
+                } else if (data['cityCode'] == 'Ufa') {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (347) 246-23-97">+7 (347) 246-23-97</a>');
+                } else if (data['cityCode'] == 'Vladivostok') {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (423) 230-22-23">+7 (423) 230-22-23</a>');
+                } else {
+                    $('.headerPhone a:first-child').remove();
+                    $('.headerPhone').prepend('<a href="tel:+7 (812) 327-37-00">+7 (812) 327-37-00</a>');
+                } setCookie('lci_city', data['cityCode'], {secure: true, 'max-age': 365*24*60});
+            }
+        },
+        error: function() {}
+    });
+} else if ($('input[name="geoip"]').val() != '') {
+    var userAgent = navigator.userAgent;
+    if (getCookie('isBot') && getCookie('isBot') != 'yes') {
+        $('.citySelect > span').text('Санкт-Петербург');
+        $('#modalCitySelect > span').text('Санкт-Петербург');
+        currentCity = 'Saint Petersburg';
+        $('input[name="findyou"], input#city').each(function(){
+            $(this).val(currentCity);
+        });
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (812) 327-37-00">+7 (812) 327-37-00</a>');
+        setCookie('lci_city', 'Saint Petersburg', {secure: true, 'max-age': 365*24*60});
+        $.ajax({
+            url: window.location.origin+'/assets/components/labconcept/php/checkBot.php',
+            type: 'post',
+            data: {ip: $('input[name="geoip"]').val(), user: userAgent.toLowerCase()},
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data['status'] == 'ok') {
+                    console.log('checkBot');
+                }
+            },
+            error: function() {}
+        });
+    } else if (userAgent.toLowerCase().indexOf('search') >= 0 || userAgent.toLowerCase().indexOf('track') >= 0 || userAgent.toLowerCase().indexOf('master') >= 0 || userAgent.toLowerCase().indexOf('bot') >= 0 || userAgent.toLowerCase().indexOf('metrika') >= 0 || userAgent.toLowerCase().indexOf('spider') >= 0 || userAgent.toLowerCase().indexOf('outlook') >= 0 || userAgent.toLowerCase().indexOf('python') >= 0) {
+        $('.citySelect > span').text('Санкт-Петербург');
+        $('#modalCitySelect > span').text('Санкт-Петербург');
+        currentCity = 'Saint Petersburg';
+        $('input[name="findyou"], input#city').each(function(){
+            $(this).val(currentCity);
+        });
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (812) 327-37-00">+7 (812) 327-37-00</a>');
+        setCookie('lci_city', 'Saint Petersburg', {secure: true, 'max-age': 365*24*60});
+        $.ajax({
+            url: window.location.origin+'/assets/components/labconcept/php/checkBot.php',
+            type: 'post',
+            data: {ip: $('input[name="geoip"]').val(), user: userAgent.toLowerCase()},
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data['status'] == 'ok') {
+                    console.log('checkBot');
+                }
+            },
+            error: function() {}
+        });
+    } else {
+        $.ajax({
+            url: window.location.origin+'/assets/components/labconcept/php/cityFromAPI.php',
+            type: 'post',
+            data: {ip: $('input[name="geoip"]').val(), user: userAgent.toLowerCase()},
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data['status'] == 'ok') {
+                    // console.log('City: false');
+                    // console.log('City: '+data['city']);
+                    $('.citySelect > span').text(data['cityName']);
+                    $('#modalCitySelect > span').text(data['cityName']);
+                    currentCity = data['cityName'];
+                    $('input[name="findyou"], input#city').each(function(){
+                        $(this).val(currentCity);
+                    });
+                    if (data['cityCode'] == 'Nizhny Novgorod') {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (831) 228-80-02">+7 (831) 228-80-02</a>');
+                    } else if (data['cityCode'] == 'Moscow') {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (495) 136-21-74">+7 (495) 136-21-74</a>');
+                    } else if (data['cityCode'] == 'Kazan') {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (843) 205-48-85">+7 (843) 205-48-85</a>');
+                    } else if (data['cityCode'] == 'Ufa') {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (347) 246-23-97">+7 (347) 246-23-97</a>');
+                    } else if (data['cityCode'] == 'Vladivostok') {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (423) 230-22-23">+7 (423) 230-22-23</a>');
+                    } else {
+                        $('.headerPhone a:first-child').remove();
+                        $('.headerPhone').prepend('<a href="tel:+7 (812) 327-37-00">+7 (812) 327-37-00</a>');
+                    } setCookie('lci_city', data['cityCode'], {secure: true, 'max-age': 365*24*60});
+                }
+            },
+            error: function() {}
+        });
+        $.ajax({
+            url: window.location.origin+'/assets/components/labconcept/php/checkBot.php',
+            type: 'post',
+            data: {ip: $('input[name="geoip"]').val(), user: userAgent.toLowerCase()},
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data['status'] == 'ok') {
+                    console.log('checkBot');
+                }
+            },
+            error: function() {}
+        });
+    }
+}
+
+/* $.ajax({
+    url: window.location.origin+'/assets/components/labconcept/php/setIP.php',
+    type: 'post',
+    success: function() {
+        // console.log('Success');
+    },
+    error: function() {
+        // console.log('Error02');
+    }
+}); */
+
+$('#modalCitySelect span').click(function(){
+    $('#modalCitySelect').toggleClass('open');
+});
+$('#modalCitySelect li').click(function(){
+    // var cookie = $(this).data('index'),
+    var cookie = $(this).attr('data-index'),
+        thisCity = $(this).text(),
+        lastCity = $('#modalCitySelect span').text();
+        
+    if (cookie == 'Nizhny Novgorod') {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (831) 228-80-02">+7 (831) 228-80-02</a>');
+    } else if (cookie == 'Moscow') {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (495) 136-21-74">+7 (495) 136-21-74</a>');
+    } else if (cookie == 'Kazan') {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (843) 205-48-85">+7 (843) 205-48-85</a>');
+    } else if (cookie == 'Ufa') {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (347) 246-23-97">+7 (347) 246-23-97</a>');
+    } else if (cookie == 'Vladivostok') {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (423) 230-22-23">+7 (423) 230-22-23</a>');
+    } else {
+        $('.headerPhone a:first-child').remove();
+        $('.headerPhone').prepend('<a href="tel:+7 (812) 327-37-00">+7 (812) 327-37-00</a>');
+    }
+        
+    setCookie('lci_city', cookie, {secure: true, 'max-age': 365*24*60});
+    $('#modalCitySelect ul').append('<li>'+lastCity+'</li>');
+    $('#modalCitySelect span, .citySelect span').text(thisCity);
+    $('#modalCity').removeClass('open');
+});
+$('#modalCitySelect input').keyup(function(){
+    var citySearch = $(this).val();
+    if (citySearch.length > 0) {
+        citySearch = citySearch.charAt(0).toUpperCase()+citySearch.slice(1);
+        var searchLength = citySearch.length;
+        $('#modalCitySelect li').each(function(e){
+            if (citySearch != $(this).text().substr(0, searchLength)) {
+                $(this).addClass('hidden');
+            } else {
+                $(this).removeClass('hidden');
+            }
+        });
+    } else {
+        $('#modalCitySelect li.allView').removeClass('hidden');
+        $('#modalCitySelect li:not(.allView)').addClass('hidden');
+    }
+});
+
+var currentURL = window.location.href;
+
+if (currentURL.includes('.ru/en/')) {
+
+    setCookie('userLang', 'en');
+
+}
+
+
+
+$('.langSelect a').click(function(){
+
+    var toEn = currentURL.replace('.ru/', '.ru/en/');
+
+    var toRu = currentURL.replace('.ru/en/', '.ru/');
+
+    if (!$(this).hasClass('active')) {
+
+        if ($(this).text() == 'EN') {
+
+            setCookie('userLang', 'en');
+
+            window.location.href = toEn;
+
+        } else {
+
+            setCookie('userLang', 'ru');
+
+            window.location.href = toRu;
+
+        }
+
+    }
+
+});
+
+
+
+if (getCookie('userLang') == 'en') {
+
+    $('.mainmenu-items a').each(function(){
+
+        $(this).attr('href', '/en'+$(this).attr('href'));
+
+    });
+
+  /*  $('.fmItem a').each(function(){
+
+        $(this).attr('href', '/en'+$(this).attr('href'));
+
+    });
+
+    $('.js-menu a').each(function(){
+
+        if ($(this).attr('href') != 'javascript:void(0);') {
+
+            $(this).attr('href', '/en'+$(this).attr('href'));
+
+        }
+
+    });*/
+
+}
+
+
+if (getCookie('siteView')) {
+    var thisTime = getCookie('siteView');
+    $('input[name="siteView"]').val(thisTime);
+}
+setInterval(function(){
+    var thisTime = Number($('input[name="siteView"]').val());
+    // console.log(thisTime > 295);
+    if (thisTime < 300) {
+        $('input[name="siteView"]').val(thisTime+5);
+        setCookie('siteView', thisTime+5);
+    }
+    
+    if (getCookie('slideBanner') != 'hide') {
+        if ((getCookie('fromYandex') == 'yes' && (currentCity == 'Санкт-Петербург' || currentCity == 'Москва') && getCookie('hasKP') == 'yes') || (getCookie('fromYandex') == 'yes' && (currentCity == 'Санкт-Петербург' || currentCity == 'Москва') && thisTime > 295)) {
+            // $('.slideBanner').addClass('open');
+            // ym(82967638, 'reachGoal', 'sbOpen');
+        }
+    }
+},5000);
+
+$('.slideBanner a').click(function(){
+    ym(82967638, 'reachGoal', 'sbClick');
+});
+
+var currentURL = window.location.href;
+if (currentURL.includes('utm_source=yandex')) {
+    setCookie('fromYandex', 'yes');
+}
+
+$('.sbClose').click(function(){
+    $('.slideBanner').removeClass('open');
+    $('.slideBanner').addClass('hidden');
+    setCookie('slideBanner', 'hide');
+});
+
+/* $('input[name="findyou"]').val($('.citySelect span').text());
+$('input#city').val($('.citySelect span').text()); */
+
+var eventTypes = [];
+$('.event[data-event]').each(function(){
+    var thisType = $(this).data('event');
+    if (!eventTypes.includes(thisType) && thisType != '') {
+        eventTypes.push(thisType);
+        $('select[name="selecttype"]').append('<option value="'+thisType+'">'+thisType+'</option>');
+    }
+});
+if ($('div').is('.events.bySelect')) {
+    var eventsList = $('.events.bySelect .monthList');
+    eventsList.sort(function(a,b){
+        return $(a).data('id')-$(b).data('id')
+    }); $('.events.bySelect').html(eventsList);
+    var selectList = $('select[name="selectdate"] option');
+    selectList.sort(function(a,b){
+        a = a.value;
+        b = b.value;
+        return a-b;
+    }); $('select[name="selectdate"]').html(selectList);
+    if ($('.monthList.active').has('p') && !$('.monthList.active').has('div') && $('.monthList.active').next().is('.monthList')) {
+        var thisMonth = $('.monthList.active').data('id'),
+            nextMonth = $('.monthList.active').next().data('id');
+        $('select[name="selectdate"]').val(nextMonth);
+        $('.monthList[data-id="'+thisMonth+'"]').removeClass('active');
+        $('.monthList[data-id="'+nextMonth+'"]').addClass('active');
+    }
+} $('.select2').select2({minimumResultsForSearch: Infinity});
+
+function setCookie(name, value, options = {}) {
+    options = {
+        path: '/',
+        domain: '.labconcept.ru',
+    };
+    if (options.expires instanceof Date) {
+        options.expires = options.expires.toUTCString();
+    }
+    let updatedCookie = encodeURIComponent(name)+"="+encodeURIComponent(value);
+    for (let optionKey in options) {
+        updatedCookie += "; "+optionKey;
+        let optionValue = options[optionKey];
+        if (optionValue !== true) {
+            updatedCookie += "="+optionValue;
+        }
+    } document.cookie = updatedCookie;
+}
+
+function getCookie(name) {
+    let matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}

@@ -1,0 +1,244 @@
+var AjaxForm = {
+
+    initialize: function (afConfig) {
+        if (!jQuery().ajaxForm) {
+            document.write('<script src="' + afConfig['assetsUrl'] + 'js/lib/jquery.form.min.js"><\/script>');
+        }
+        if (!jQuery().jGrowl) {
+            document.write('<script src="' + afConfig['assetsUrl'] + 'js/lib/jquery.jgrowl.min.js"><\/script>');
+        }
+
+        $(document).ready(function () {
+            $.jGrowl.defaults.closerTemplate = '<div>[ ' + afConfig['closeMessage'] + ' ]</div>';
+        });
+
+        $(document).off('submit', afConfig['formSelector']).on('submit', afConfig['formSelector'], function (e) {
+            
+            $(this).ajaxSubmit({
+                dataType: 'json',
+                data: {pageId: afConfig['pageId']},
+                url: afConfig['actionUrl'],
+                beforeSerialize: function (form) {
+                    form.find(':submit').each(function () {
+                        if (!form.find('input[type="hidden"][name="' + $(this).attr('name') + '"]').length) {
+                            $(form).append(
+                                $('<input type="hidden">').attr({
+                                    name: $(this).attr('name'),
+                                    value: $(this).attr('value')
+                                })
+                            );
+                        }
+                    })
+                },
+                beforeSubmit: function (fields, form) {
+                    //noinspection JSUnresolvedVariable
+                    //if (typeof(afValidated) != 'undefined' && afValidated == false) {
+                    //    return false;
+                    //}
+                    form.find('.error').html('');
+                    form.find('.error').removeClass('error');
+                    form.find('input,textarea,select,button').attr('disabled', true);
+                    return true;
+                },
+                success: function (response, status, xhr, form) {
+                    form.find('input,textarea,select,button').attr('disabled', false);
+                    response.form = form;
+                    $(document).trigger('af_complete', response);
+                    if (!response.success) {
+                        AjaxForm.Message.error(response.message);
+                        if (response.data) {
+                            var key, value, focused;
+                            for (key in response.data) {
+                                if (response.data.hasOwnProperty(key)) {
+                                    if (!focused) {
+                                        form.find('[name="' + key + '"]').focus();
+                                        focused = true;
+                                    }
+                                    value = response.data[key];
+                                    form.find('.error_' + key).html(value).addClass('error');
+                                    form.find('[name="' + key + '"]').addClass('error');
+                                }
+                            }
+                        }
+                    } else {
+                        if (form.find('input[name="receiver"]').length) {
+                            var ssName = form.find('input[name="receiver"]').val();
+                        } else if (form.find('input[name="name"]').length) {
+                            var ssName = form.find('input[name="name"]').val();
+                        }
+                        if (form.find('input[name="email"]').length) {
+                            var ssEmail = form.find('input[name="email"]').val();
+                        }
+                        
+                        if (ssName != '' && ssEmail != '') {
+                            var catsList = [],
+                                formName = 'noform';
+                            $('.B_crumbBox li span[itemprop="name"]').each(function(){
+                                catsList.push($(this).text());
+                            });
+                            if (catsList.indexOf('Каталог') >= 0) {
+                                if (catsList.indexOf('Аналитическое оборудование') >= 0) {
+                                    if (catsList.indexOf('Жидкостная хроматография и хромато-масс-спектрометрия') >= 0) {
+                                        formName = 'pl98694';
+                                        // formName = 'pl94307';
+                                    } else if (catsList.indexOf('Газовая хроматография и хромато-масс-спектрометрия') >= 0) {
+                                        formName = 'pl97429';
+                                        // formName = 'pl57631';
+                                    } else if (catsList.indexOf('Атомно-спектральные приборы') >= 0) {
+                                        formName = 'pl45109';
+                                        // formName = 'pl41086';
+                                    } else if (catsList.indexOf('Молекулярная спектроскопия') >= 0) {
+                                        formName = 'pl98421';
+                                        // formName = 'pl85835';
+                                    } else {
+                                        formName = 'pl54639';
+                                        // formName = 'pl1455';
+                                    }
+                                } else if (catsList.indexOf('Расходные материалы') >= 0) {
+                                    formName = 'pl60632';
+                                    // formName = 'pl57635';
+                                } else {
+                                    formName = 'pl10187';
+                                    // formName = 'pl8817';
+                                }
+                            } else {
+                                formName = 'pl8517';
+                                // formName = 'pl16902';
+                            }
+
+                            var form_data = new FormData();
+                            form_data.append('ssName', ssName);
+                            form_data.append('ssEmail', ssEmail);
+                            form_data.append('formName', formName);
+                            $.ajax({
+                                url: window.location.origin+'/dev/sendsay.php',
+                                type: 'post',
+                                dataType: 'text',
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                data: form_data,
+                                success: function(data) {
+                                    console.log('SendSay was sent');
+                                }
+                            });
+                        }
+                        
+                        //noinspection JSUnresolvedVariable
+                        if (typeof(grecaptcha) != 'undefined') {
+                            //noinspection JSUnresolvedVariable
+                            grecaptcha.reset();
+                        } ym(82967638, 'reachGoal', 'lid');
+                        if (form[0]['className'] == 'isModal callForm ajax_form af_example') {
+                            ym(82967638, 'reachGoal', 'callback');
+                        } else if (form[0]['className'] == 'isModal seminar ajax_form af_example') {
+                            ym(82967638, 'reachGoal', 'seminar');
+                        } else if (form[0]['className'] == 'isModal lc_form prod ajax_form') {
+                            ym(82967638, 'reachGoal', 'kp');
+                            setCookie('hasKP', 'yes');
+                        } else if (form[0]['className'] == 'isModal lc_form ajax_form analog') {
+                            ym(82967638, 'reachGoal', 'analog');
+                        } else if (form[0]['className'] == 'isModal showForm ajax_form af_example') {
+                            ym(82967638, 'reachGoal', 'show');
+                        } else if (form[0]['className'] == 'showForm ajax_form af_example') {
+                            ym(82967638, 'reachGoal', 'show_nm');
+                            form.html('<p class="wasSent">Наш менеджер свяжется с Вами в ближайшее время!</p>');
+                        }else if (form[0]['className'] == 'pageform ajax_form af_example') {
+                            form.html('<p class="wasSent">Мы свяжемся с Вами в ближайшее время!</p>');
+                        }
+						else if (form[0]['className'] == 'seminarSingle ajax_form af_example') {
+                            var form_data_event = new FormData();
+                            var competitorName = form.find('input[name="name"]').val(),
+                                competitorOrganization = form.find('input[name="organization"]').val(),
+                                competitorJob = form.find('input[name="job"]').val(),
+                                competitorPhone = form.find('input[name="phone"]').val(),
+                                competitorEmail = form.find('input[name="email"]').val(),
+                                competitorEventID = form.find('input[name="event_id"]').val();
+                            
+                            form_data_event.append('name', competitorName);
+                            form_data_event.append('organization', competitorOrganization);
+                            form_data_event.append('job', competitorJob);
+                            form_data_event.append('phone', competitorPhone);
+                            form_data_event.append('email', competitorEmail);
+                            form_data_event.append('event_id', competitorEventID);
+                            /* for (var pair of form_data_event.entries()) {
+                                console.log(pair[0]+ ', ' + pair[1]); 
+                            } */
+                            $.ajax({
+                                url: 'https://event.labconcept.ru/competitor?action=fromsite',
+                                type: 'post',
+                                dataType: 'json',
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                data: form_data_event,
+                                success: function(data) {
+                                    console.log(data);
+                                    console.log('LabEvents was updated');
+                                }
+                            }); ym(82967638, 'reachGoal', 'seminar');
+                            form.html('<p class="wasSent">Благодарим за регистрацию! Вам будет выслано письмо с подтверждением регистрации</p>');
+                        }
+                        if (form[0]['className'].includes('isModal')) {
+                            $('.modal.open .modalTitle').text('Ваша заявка отправлена!');
+                            form.html('<p class="wasSent">Наш менеджер свяжется с Вами в ближайшее время!</p>');
+                        }
+                        if (form[0]['className'].includes('seminarSingleService')) {
+                            $('.seminarSingleService').height($('.seminarSingleService').height());
+                            $('.seminarSingleService').html('<p>Ваша заявка принята. Мы свяжемся с Вами в ближайшее время</p>');
+                        }
+                        
+                        AjaxForm.Message.success(response.message);
+                        form.find('.error').removeClass('error');
+                        form[0].reset();
+                    }
+                }
+            }); e.preventDefault();
+            return false;
+        });
+
+        $(document).on('keypress change', '.error', function () {
+            var key = $(this).attr('name');
+            $(this).removeClass('error');
+            $('.error_' + key).html('').removeClass('error');
+        });
+
+        $(document).on('reset', afConfig['formSelector'], function () {
+            $(this).find('.error').html('');
+            AjaxForm.Message.close();
+        });
+    }
+
+};
+
+
+//noinspection JSUnusedGlobalSymbols
+AjaxForm.Message = {
+    success: function (message, sticky) {
+        if (message) {
+            if (!sticky) {
+                sticky = false;
+            }
+            $.jGrowl(message, {theme: 'af-message-success', sticky: sticky});
+        }
+    },
+    error: function (message, sticky) {
+        if (message) {
+            if (!sticky) {
+                sticky = false;
+            }
+            $.jGrowl(message, {theme: 'af-message-error', sticky: sticky});
+        }
+    },
+    info: function (message, sticky) {
+        if (message) {
+            if (!sticky) {
+                sticky = false;
+            }
+            $.jGrowl(message, {theme: 'af-message-info', sticky: sticky});
+        }
+    },
+    close: function () {
+        $.jGrowl('close');
+    },
+};
